@@ -1,0 +1,29 @@
+name: Staging deployment
+
+on: 
+  pull_request:
+    types: [labeled]
+
+jobs:
+  build-and-deploy:
+    if: contains(github.event.pull_request.labels.*.name, 'staging')
+    name: Build Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: setup node
+        uses: actions/setup-node@v1 
+
+      - name: npm install and build
+        run: |
+          npm install
+          npm run build --if-present
+          
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: ActionTestNodeJS
+          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
